@@ -4,41 +4,34 @@ import {
   Menu,
   X,
   ChevronDown,
-  User,
-  LogIn,
-  LogOut,
-  LayoutDashboard,
-  Settings,
-  MessageSquare,
+  Sprout,
+  BookOpen,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useNursery } from '../context/NurseryContext';
-import { LoginModal } from './LoginModal';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
-  const { nursery } = useNursery();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [nutmegDropdownOpen, setNutmegDropdownOpen] = useState(false);
-  const [mobileNutmegOpen, setMobileNutmegOpen] = useState(false);
-  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-
-  const dropdownRef = useRef(null);
-  const accountDropdownRef = useRef(null);
   const location = useLocation();
+
+  // Desktop Nutmeg dropdown state
+  const [nutmegDropdownOpen, setNutmegDropdownOpen] = useState(false);
+
+  // Mobile drawer & accordion states
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileNutmegOpen, setMobileNutmegOpen] = useState(false);
+
+  // Ref for click outside dropdown
+  const nutmegRef = useRef(null);
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
-  // Close dropdowns on clicks outside
+  // Close dropdown on outside clicks
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (nutmegRef.current && !nutmegRef.current.contains(event.target)) {
         setNutmegDropdownOpen(false);
-      }
-      if (accountDropdownRef.current && !accountDropdownRef.current.contains(event.target)) {
-        setAccountDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -49,404 +42,332 @@ export const Navbar = () => {
   useEffect(() => {
     setMobileMenuOpen(false);
     setNutmegDropdownOpen(false);
-    setAccountDropdownOpen(false);
+    setMobileNutmegOpen(false);
   }, [location.pathname]);
 
-  const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path);
-  };
-
+  // Route active state helpers
+  const isHomeActive = location.pathname === '/';
+  const isAboutActive = location.pathname === '/about';
   const isNutmegActive =
     location.pathname.startsWith('/plants') ||
     location.pathname.startsWith('/nutmeg') ||
     location.pathname.startsWith('/uses-of-nutmeg');
+  const isPlantingActive =
+    location.pathname.startsWith('/planting-tips') ||
+    location.pathname.startsWith('/plant-care');
+  const isGalleryActive = location.pathname.startsWith('/gallery');
+  const isAwardsActive = location.pathname.startsWith('/awards');
+  const isContactActive = location.pathname.startsWith('/contact');
+
+  // Shared active underline indicator with vibrant lime accent
+  const activeUnderline =
+    "text-[#C4E85A] font-semibold after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-full after:h-[2px] after:bg-[#C4E85A] after:rounded-full";
 
   return (
-    <header className="sticky top-0 z-50 bg-[#F7F5EE]/95 backdrop-blur-md border-b border-[#084F09]/10 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[76px] sm:h-[80px] gap-2 lg:gap-4">
+    <header className="sticky top-0 z-50 bg-[#071C14]/95 backdrop-blur-md border-b border-[#123D27]/40 transition-colors">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 xl:px-14">
+        
+        {/* Main Header Container: 88px desktop, 76px mobile */}
+        <div className="flex items-center justify-between h-[76px] lg:h-[88px] w-full">
           
           {/* ==================================================
-              1. LEFT: ORIGINAL GREEN SQUARE LOGO + BRAND IDENTITY
-              - 54px x 54px square with ~11px rounded corners
-              - No outer circle, no extra border, no shadow
-              - Original dark green background & colors preserved
-              - Controlled width: ~300–310px
-              - 14–16px gap between logo and brand text
-              - KINATTUKARA: Cormorant Garamond, 28px, 600/700, deep forest green
-              - Subtitle: Inter, 13px, medium weight, same brand green
+              DESKTOP VIEW (>= 1024px)
+              Target Layout:
+              [ LOGO ]   Home   About   Our Plants   Nutmeg ▼   Planting Tips   Gallery   Awards   Contact
+              - Compact gap between logo & navigation
+              - No excessive space-between
+              - No CTA buttons, No Login button
+              - Dark botanical styling with cream text & lime accents
              ================================================== */}
-          <Link
-            to="/"
-            className="logo-section flex items-center gap-[12px] xl:gap-[15px] shrink-0 w-auto lg:w-[280px] xl:w-[310px] max-w-[310px] group py-1"
-            style={{ flexShrink: 0 }}
-          >
-            {/* Original Green Square Logo: 54px × 54px */}
-            <div className="w-[50px] h-[50px] xl:w-[54px] xl:h-[54px] rounded-[11px] overflow-hidden shrink-0">
-              <img
-                src="/images/kinattukara_square_logo.png"
-                alt="Kinattukara Nutmeg Logo"
-                className="w-full h-full object-cover transform group-hover:scale-[1.03] transition-transform duration-300"
-              />
-            </div>
-
-            {/* Brand Titles */}
-            <div className="flex flex-col min-w-0 justify-center">
-              <span className="font-cormorant text-[24px] xl:text-[28px] font-bold text-[#084F09] leading-none tracking-[0.02em] uppercase group-hover:text-[#053806] transition-colors">
-                KINATTUKARA
-              </span>
-              <span className="font-sans text-[12px] xl:text-[13px] font-medium text-[#084F09] tracking-[0.2px] whitespace-nowrap leading-tight mt-1">
-                Nutmeg Plantation & Nursery
-              </span>
-            </div>
-          </Link>
-
-          {/* ==================================================
-              2. CENTER: MAIN PUBLIC NAVIGATION
-              - Sufficient spacing between brand area and Home (pl-4 xl:pl-6)
-              - Do not allow KINATTUKARA to visually collide with Home
-              - Flexible spacing between navigation items
-              - Thin deep-green underline for active item (no pills)
-             ================================================== */}
-          <nav
-            className="navigation-section hidden lg:flex items-center justify-center flex-1 pl-4 xl:pl-6 pr-2 space-x-2.5 xl:space-x-5 text-[14px] xl:text-[15px] font-medium whitespace-nowrap"
-            style={{ flex: 1 }}
-          >
-            {/* 1. HOME */}
+          <div className="hidden lg:flex items-center justify-start lg:gap-8 xl:gap-11 w-full">
+            
+            {/* Brand Logo & Typography */}
             <Link
               to="/"
-              className={`transition-colors py-1 border-b-2 ${
-                isActive('/')
-                  ? 'text-[#084F09] font-semibold border-[#084F09]'
-                  : 'text-[#172018] hover:text-[#084F09] border-transparent'
-              }`}
+              className="flex items-center gap-3 shrink-0 py-1 group transition-transform duration-200"
+              aria-label="Kinattukara Nutmeg Plantation & Nursery"
             >
-              Home
-            </Link>
-
-            {/* 2. ABOUT US */}
-            <Link
-              to="/about"
-              className={`transition-colors py-1 border-b-2 ${
-                isActive('/about')
-                  ? 'text-[#084F09] font-semibold border-[#084F09]'
-                  : 'text-[#172018] hover:text-[#084F09] border-transparent'
-              }`}
-            >
-              About Us
-            </Link>
-
-            {/* 3. NUTMEG DROPDOWN */}
-            <div
-              className="relative"
-              ref={dropdownRef}
-              onMouseEnter={() => setNutmegDropdownOpen(true)}
-              onMouseLeave={() => setNutmegDropdownOpen(false)}
-            >
-              <button
-                onClick={() => setNutmegDropdownOpen(!nutmegDropdownOpen)}
-                className={`inline-flex items-center space-x-1 transition-colors py-1 border-b-2 ${
-                  isNutmegActive
-                    ? 'text-[#084F09] font-semibold border-[#084F09]'
-                    : 'text-[#172018] hover:text-[#084F09] border-transparent'
-                }`}
-                aria-expanded={nutmegDropdownOpen}
-              >
-                <span>Nutmeg</span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                    nutmegDropdownOpen ? 'rotate-180 text-[#084F09]' : 'text-[#647563]'
-                  }`}
+              <div className="w-[46px] h-[46px] xl:w-[50px] xl:h-[50px] rounded-[10px] overflow-hidden shrink-0 shadow-sm border border-[#123D27]/50">
+                <img
+                  src="/images/kinattukara_square_logo.png"
+                  alt="Kinattukara Emblem"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-              </button>
+              </div>
 
-              {nutmegDropdownOpen && (
-                <div className="absolute top-full left-0 pt-2 w-56 z-50 animate-fadeIn">
-                  <div className="bg-white border border-[#084F09]/10 rounded-xl shadow-lg p-2 space-y-1">
-                    <Link
-                      to="/plants/nutmeg"
-                      className={`block px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                        location.pathname.startsWith('/plants')
-                          ? 'bg-[#084F09]/10 text-[#084F09] font-semibold'
-                          : 'text-[#172018] hover:bg-[#084F09]/5 hover:text-[#084F09]'
-                      }`}
-                    >
-                      Our Nutmeg Plants
-                    </Link>
-                    <Link
-                      to="/uses-of-nutmeg"
-                      className={`block px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                        location.pathname.includes('/uses')
-                          ? 'bg-[#084F09]/10 text-[#084F09] font-semibold'
-                          : 'text-[#172018] hover:bg-[#084F09]/5 hover:text-[#084F09]'
-                      }`}
-                    >
-                      Uses of Nutmeg
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 4. PLANTING TIPS */}
-            <Link
-              to="/planting-tips"
-              className={`transition-colors py-1 border-b-2 ${
-                isActive('/planting-tips') || isActive('/plant-care')
-                  ? 'text-[#084F09] font-semibold border-[#084F09]'
-                  : 'text-[#172018] hover:text-[#084F09] border-transparent'
-              }`}
-            >
-              Planting Tips
+              <div className="flex flex-col justify-center">
+                <span className="font-display text-[22px] xl:text-[24px] font-extrabold text-[#F2F0E5] leading-none tracking-[-0.03em] uppercase group-hover:text-[#C4E85A] transition-colors">
+                  KINATTUKARA
+                </span>
+                <span className="font-sans text-[11px] xl:text-[12px] font-medium text-[#D8D9C9]/85 tracking-[0.2px] whitespace-nowrap leading-tight mt-1">
+                  Nutmeg Plantation & Nursery
+                </span>
+              </div>
             </Link>
 
-            {/* 5. AWARDS */}
-            <Link
-              to="/awards"
-              className={`transition-colors py-1 border-b-2 ${
-                isActive('/awards')
-                  ? 'text-[#084F09] font-semibold border-[#084F09]'
-                  : 'text-[#172018] hover:text-[#084F09] border-transparent'
-              }`}
-            >
-              Awards
-            </Link>
+            {/* Desktop Navigation Group (20–26px gap between items) */}
+            <nav className="flex items-center gap-[20px] xl:gap-[26px] text-[15px] xl:text-[16px] font-semibold tracking-[-0.01em] whitespace-nowrap">
+              
+              {/* 1. HOME */}
+              <Link
+                to="/"
+                className={`relative py-1 transition-colors duration-200 ${
+                  isHomeActive
+                    ? activeUnderline
+                    : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
+                }`}
+              >
+                Home
+              </Link>
 
-            {/* 6. GALLERY */}
-            <Link
-              to="/gallery"
-              className={`transition-colors py-1 border-b-2 ${
-                isActive('/gallery')
-                  ? 'text-[#084F09] font-semibold border-[#084F09]'
-                  : 'text-[#172018] hover:text-[#084F09] border-transparent'
-              }`}
-            >
-              Gallery
-            </Link>
+              {/* 2. ABOUT */}
+              <Link
+                to="/about"
+                className={`relative py-1 transition-colors duration-200 ${
+                  isAboutActive
+                    ? activeUnderline
+                    : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
+                }`}
+              >
+                About
+              </Link>
 
-            {/* 7. CONTACT */}
-            <Link
-              to="/contact"
-              className={`transition-colors py-1 border-b-2 ${
-                isActive('/contact')
-                  ? 'text-[#084F09] font-semibold border-[#084F09]'
-                  : 'text-[#172018] hover:text-[#084F09] border-transparent'
-              }`}
-            >
-              Contact
-            </Link>
-          </nav>
-
-          {/* ==================================================
-              3. RIGHT: AUTHENTICATED USER ACCOUNT / LOGIN
-              - Username never cut off (controlled max width & ellipsis)
-              - Never overlaps center navigation
-             ================================================== */}
-          <div
-            className="account-section hidden lg:flex items-center justify-end shrink-0 min-w-[120px]"
-            style={{ flexShrink: 0 }}
-          >
-            {user ? (
-              <div className="relative" ref={accountDropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-                  className="inline-flex items-center space-x-2 text-[14px] font-medium text-[#172018] hover:text-[#084F09] transition-colors py-1.5 px-2.5 sm:px-3 rounded-lg hover:bg-[#084F09]/5 whitespace-nowrap"
-                  aria-expanded={accountDropdownOpen}
-                >
-                  <span className="w-7 h-7 rounded-full bg-[#084F09]/10 text-[#084F09] flex items-center justify-center shrink-0">
-                    <User className="w-4 h-4" />
-                  </span>
-                  <span className="max-w-[120px] xl:max-w-[160px] truncate font-medium text-[#0B2115]">
-                    {user.name && user.name.length <= 18
-                      ? user.name
-                      : isSuperAdmin
-                      ? 'Super Admin'
-                      : isAdmin
-                      ? 'Nursery Admin'
-                      : user.name || 'User'}
-                  </span>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 text-[#647563] transition-transform duration-200 ${
-                      accountDropdownOpen ? 'rotate-180 text-[#084F09]' : ''
+              {/* 3. NUTMEG DROPDOWN (Primary Plant Catalogue) */}
+              <div
+                className="relative py-1"
+                ref={nutmegRef}
+                onMouseEnter={() => setNutmegDropdownOpen(true)}
+                onMouseLeave={() => setNutmegDropdownOpen(false)}
+              >
+                <div className="flex items-center space-x-1 cursor-pointer">
+                  <Link
+                    to="/plants/nutmeg"
+                    className={`transition-colors duration-200 ${
+                      isNutmegActive
+                        ? 'text-[#C4E85A] font-semibold'
+                        : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
                     }`}
-                  />
-                </button>
+                  >
+                    Nutmeg
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setNutmegDropdownOpen(!nutmegDropdownOpen);
+                    }}
+                    aria-label="Toggle Nutmeg submenu"
+                    className="p-0.5 text-[#D8D9C9]/70 hover:text-[#C4E85A]"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        nutmegDropdownOpen ? 'rotate-180 text-[#C4E85A]' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
 
-                {/* Account Dropdown */}
-                {accountDropdownOpen && (
-                  <div className="absolute right-0 top-full pt-2 w-64 z-50 animate-fadeIn">
-                    <div className="bg-white border border-[#163A24]/10 rounded-xl shadow-lg p-2 space-y-1">
-                      {/* Dropdown Header: User info */}
-                      <div className="px-3 py-2.5 bg-[#F7F5EE]/70 rounded-lg mb-1 border-b border-[#163A24]/10">
-                        <div className="flex items-center space-x-2">
-                          <User className="w-4 h-4 text-[#163A24] shrink-0" />
-                          <span className="text-xs font-semibold text-[#0B2115] truncate">
-                            {user.name || user.email}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#647563] font-medium pl-6">
-                          {isSuperAdmin
-                            ? 'Super Admin'
-                            : isAdmin
-                            ? 'Nursery Admin'
-                            : 'Normal User'}
-                        </p>
-                      </div>
+                {isNutmegActive && (
+                  <span className="absolute bottom-[-4px] left-0 w-full h-[2px] bg-[#C4E85A] rounded-full pointer-events-none" />
+                )}
 
-                      {/* Dropdown Links based on user role */}
-                      {isAdmin ? (
-                        <>
-                          <Link
-                            to={isSuperAdmin ? '/super-admin' : '/admin'}
-                            className="flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24] transition-colors"
-                          >
-                            <LayoutDashboard className="w-3.5 h-3.5 text-[#163A24]" />
-                            <span>Admin Dashboard</span>
-                          </Link>
-                          <Link
-                            to="/admin/settings"
-                            className="flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24] transition-colors"
-                          >
-                            <Settings className="w-3.5 h-3.5 text-[#163A24]" />
-                            <span>Nursery Profile</span>
-                          </Link>
-                        </>
-                      ) : (
-                        <>
-                          <Link
-                            to="/contact"
-                            className="flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24] transition-colors"
-                          >
-                            <User className="w-3.5 h-3.5 text-[#163A24]" />
-                            <span>My Profile</span>
-                          </Link>
-                          <Link
-                            to="/contact"
-                            className="flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24] transition-colors"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5 text-[#163A24]" />
-                            <span>My Enquiries</span>
-                          </Link>
-                        </>
-                      )}
-
-                      {/* Divider */}
-                      <div className="border-t border-[#163A24]/10 my-1"></div>
-
-                      {/* Logout Action */}
-                      <button
-                        onClick={() => {
-                          logout();
-                          setAccountDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors"
+                {/* Nutmeg Submenu Card with dark botanical glass aesthetic */}
+                {nutmegDropdownOpen && (
+                  <div className="absolute top-full left-0 pt-2 w-60 z-50 animate-fadeIn">
+                    <div className="bg-[#0B2419] border border-[#123D27] rounded-xl shadow-2xl p-2 space-y-1">
+                      <Link
+                        to="/plants/nutmeg"
+                        className={`flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-colors ${
+                          location.pathname === '/plants/nutmeg'
+                            ? 'bg-[#123D27] text-[#C4E85A]'
+                            : 'text-[#F2F0E5]/90 hover:bg-[#123D27]/60 hover:text-[#C4E85A]'
+                        }`}
                       >
-                        <LogOut className="w-3.5 h-3.5 shrink-0" />
-                        <span>Logout</span>
-                      </button>
+                        <Sprout className="w-3.5 h-3.5 text-[#A8D64B] shrink-0" />
+                        <span>Nutmeg Varieties</span>
+                      </Link>
+
+                      <Link
+                        to="/uses-of-nutmeg"
+                        className={`flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-colors ${
+                          location.pathname === '/uses-of-nutmeg'
+                            ? 'bg-[#123D27] text-[#C4E85A]'
+                            : 'text-[#F2F0E5]/90 hover:bg-[#123D27]/60 hover:text-[#C4E85A]'
+                        }`}
+                      >
+                        <BookOpen className="w-3.5 h-3.5 text-[#A8D64B] shrink-0" />
+                        <span>Uses of Nutmeg</span>
+                      </Link>
                     </div>
                   </div>
                 )}
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setLoginModalOpen(true)}
-                className="inline-flex items-center space-x-1.5 text-xs font-semibold text-[#163A24] hover:text-[#0B2115] bg-[#163A24]/10 hover:bg-[#163A24]/15 px-3.5 py-1.5 rounded-full transition-colors border border-[#163A24]/15 whitespace-nowrap cursor-pointer"
-                title="Staff & Customer Login"
+
+              {/* 5. PLANTING TIPS */}
+              <Link
+                to="/planting-tips"
+                className={`relative py-1 transition-colors duration-200 ${
+                  isPlantingActive
+                    ? activeUnderline
+                    : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
+                }`}
               >
-                <LogIn className="w-3.5 h-3.5 text-[#163A24] shrink-0" />
-                <span>Login</span>
-              </button>
-            )}
+                Planting Tips
+              </Link>
+
+              {/* 6. GALLERY */}
+              <Link
+                to="/gallery"
+                className={`relative py-1 transition-colors duration-200 ${
+                  isGalleryActive
+                    ? activeUnderline
+                    : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
+                }`}
+              >
+                Gallery
+              </Link>
+
+              {/* 7. AWARDS */}
+              <Link
+                to="/awards"
+                className={`relative py-1 transition-colors duration-200 ${
+                  isAwardsActive
+                    ? activeUnderline
+                    : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
+                }`}
+              >
+                Awards
+              </Link>
+
+              {/* 8. CONTACT */}
+              <Link
+                to="/contact"
+                className={`relative py-1 transition-colors duration-200 ${
+                  isContactActive
+                    ? activeUnderline
+                    : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
+                }`}
+              >
+                Contact
+              </Link>
+            </nav>
+
           </div>
 
           {/* ==================================================
-              4. MOBILE MENU BUTTON [ ☰ ]
+              MOBILE / TABLET VIEW (< 1024px)
+              Logo on left, Hamburger button on right
              ================================================== */}
-          <div className="flex items-center lg:hidden">
+          <div className="flex items-center justify-between w-full lg:hidden">
+            {/* Logo */}
+            <Link
+              to="/"
+              className="flex items-center gap-2.5 shrink-0 py-1"
+              aria-label="Kinattukara Home"
+            >
+              <div className="w-[40px] h-[40px] rounded-[8px] overflow-hidden shrink-0 border border-[#123D27]/50">
+                <img
+                  src="/images/kinattukara_square_logo.png"
+                  alt="Kinattukara Emblem"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col justify-center">
+                <span className="font-display text-[19px] font-extrabold text-[#F2F0E5] leading-none tracking-[-0.03em] uppercase">
+                  KINATTUKARA
+                </span>
+                <span className="font-sans text-[10px] font-medium text-[#D8D9C9]/80 tracking-[0.2px] whitespace-nowrap leading-tight mt-0.5">
+                  Nutmeg Plantation & Nursery
+                </span>
+              </div>
+            </Link>
+
+            {/* Hamburger Button */}
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#163A24] hover:bg-[#163A24]/5 rounded-lg transition-colors"
-              aria-label="Toggle Navigation Menu"
+              className="p-2 text-[#C4E85A] hover:bg-[#123D27]/40 rounded-lg transition-colors"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
+
         </div>
 
         {/* ==================================================
-            5. MOBILE NAVIGATION DRAWER
-            - Home
-            - About Us
-            - Nutmeg
-            - Planting Tips
-            - Awards
-            - Gallery
-            - Contact
-            - Authenticated user account links (only if logged in)
+            MOBILE NAVIGATION DRAWER (< 1024px)
+            Clean, dark botanical slide-down list with all 8 items
            ================================================== */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-[#163A24]/10 bg-[#F7F5EE] py-4 px-2 space-y-1 animate-fadeIn">
+          <div className="lg:hidden border-t border-[#123D27]/40 bg-[#071C14] py-4 px-2 space-y-1 animate-fadeIn">
+            
             {/* 1. Home */}
             <Link
               to="/"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive('/')
-                  ? 'bg-[#163A24]/10 text-[#163A24] font-semibold'
-                  : 'text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]'
+              className={`block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                isHomeActive
+                  ? 'bg-[#123D27] text-[#C4E85A]'
+                  : 'text-[#F2F0E5]/85 hover:bg-[#123D27]/50 hover:text-[#C4E85A]'
               }`}
             >
               Home
             </Link>
 
-            {/* 2. About Us */}
+            {/* 2. About */}
             <Link
               to="/about"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive('/about')
-                  ? 'bg-[#163A24]/10 text-[#163A24] font-semibold'
-                  : 'text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]'
+              className={`block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                isAboutActive
+                  ? 'bg-[#123D27] text-[#C4E85A]'
+                  : 'text-[#F2F0E5]/85 hover:bg-[#123D27]/50 hover:text-[#C4E85A]'
               }`}
             >
-              About Us
+              About
             </Link>
 
-            {/* 3. Nutmeg Accordion */}
+            {/* 3. Nutmeg Accordion (Primary Plant Section) */}
             <div className="rounded-lg overflow-hidden">
               <button
+                type="button"
                 onClick={() => setMobileNutmegOpen(!mobileNutmegOpen)}
-                className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-semibold transition-colors ${
                   isNutmegActive
-                    ? 'bg-[#163A24]/10 text-[#163A24] font-semibold'
-                    : 'text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]'
+                    ? 'bg-[#123D27] text-[#C4E85A]'
+                    : 'text-[#F2F0E5]/85 hover:bg-[#123D27]/50 hover:text-[#C4E85A]'
                 }`}
               >
                 <span>Nutmeg</span>
                 <ChevronDown
                   className={`w-4 h-4 transition-transform duration-200 ${
-                    mobileNutmegOpen ? 'rotate-180 text-[#163A24]' : 'text-[#647563]'
+                    mobileNutmegOpen ? 'rotate-180 text-[#C4E85A]' : 'text-[#D8D9C9]/60'
                   }`}
                 />
               </button>
 
               {mobileNutmegOpen && (
-                <div className="pl-6 pr-2 py-1 space-y-1 bg-[#163A24]/5 rounded-b-lg">
+                <div className="pl-6 pr-2 py-1 space-y-1 bg-[#0B2419] rounded-b-lg">
                   <Link
                     to="/plants/nutmeg"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded text-xs text-[#172018] hover:text-[#163A24]"
+                    className={`block px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                      location.pathname === '/plants/nutmeg'
+                        ? 'text-[#C4E85A] bg-[#123D27]/40'
+                        : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
+                    }`}
                   >
-                    • Our Nutmeg Plants
+                    • Nutmeg Varieties & Saplings
                   </Link>
                   <Link
                     to="/uses-of-nutmeg"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded text-xs text-[#172018] hover:text-[#163A24]"
+                    className={`block px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                      location.pathname === '/uses-of-nutmeg'
+                        ? 'text-[#C4E85A] bg-[#123D27]/40'
+                        : 'text-[#F2F0E5]/80 hover:text-[#C4E85A]'
+                    }`}
                   >
                     • Uses of Nutmeg
                   </Link>
@@ -454,137 +375,83 @@ export const Navbar = () => {
               )}
             </div>
 
-            {/* 4. Planting Tips */}
+            {/* 5. Planting Tips */}
             <Link
               to="/planting-tips"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive('/planting-tips') || isActive('/plant-care')
-                  ? 'bg-[#163A24]/10 text-[#163A24] font-semibold'
-                  : 'text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]'
+              className={`block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                isPlantingActive
+                  ? 'bg-[#123D27] text-[#C4E85A]'
+                  : 'text-[#F2F0E5]/85 hover:bg-[#123D27]/50 hover:text-[#C4E85A]'
               }`}
             >
               Planting Tips
-            </Link>
-
-            {/* 5. Awards */}
-            <Link
-              to="/awards"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive('/awards')
-                  ? 'bg-[#163A24]/10 text-[#163A24] font-semibold'
-                  : 'text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]'
-              }`}
-            >
-              Awards
             </Link>
 
             {/* 6. Gallery */}
             <Link
               to="/gallery"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive('/gallery')
-                  ? 'bg-[#163A24]/10 text-[#163A24] font-semibold'
-                  : 'text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]'
+              className={`block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                isGalleryActive
+                  ? 'bg-[#123D27] text-[#C4E85A]'
+                  : 'text-[#F2F0E5]/85 hover:bg-[#123D27]/50 hover:text-[#C4E85A]'
               }`}
             >
               Gallery
             </Link>
 
-            {/* 7. Contact (Final Public Item) */}
+            {/* 7. Awards */}
+            <Link
+              to="/awards"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                isAwardsActive
+                  ? 'bg-[#123D27] text-[#C4E85A]'
+                  : 'text-[#F2F0E5]/85 hover:bg-[#123D27]/50 hover:text-[#C4E85A]'
+              }`}
+            >
+              Awards
+            </Link>
+
+            {/* 8. Contact */}
             <Link
               to="/contact"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-lg text-sm transition-colors ${
-                isActive('/contact')
-                  ? 'bg-[#163A24]/10 text-[#163A24] font-semibold'
-                  : 'text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]'
+              className={`block px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                isContactActive
+                  ? 'bg-[#123D27] text-[#C4E85A]'
+                  : 'text-[#F2F0E5]/85 hover:bg-[#123D27]/50 hover:text-[#C4E85A]'
               }`}
             >
               Contact
             </Link>
 
-            {/* Mobile Authenticated User Session (Or Login Button if logged out) */}
-            {user ? (
-              <div className="pt-3 px-3 pb-1 border-t border-[#163A24]/10 space-y-1">
-                <div className="px-3 py-1.5 text-xs font-semibold text-[#0B2115] flex items-center space-x-2">
-                  <User className="w-3.5 h-3.5 text-[#163A24]" />
-                  <span className="truncate">{user.name || user.email}</span>
-                </div>
-
-                {isAdmin ? (
-                  <>
-                    <Link
-                      to={isSuperAdmin ? '/super-admin' : '/admin'}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 rounded-lg text-sm text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]"
-                    >
-                      Admin Dashboard
-                    </Link>
-                    <Link
-                      to="/admin/settings"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 rounded-lg text-sm text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]"
-                    >
-                      Nursery Profile
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/contact"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 rounded-lg text-sm text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]"
-                    >
-                      My Profile
-                    </Link>
-                    <Link
-                      to="/contact"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-3 py-2 rounded-lg text-sm text-[#172018] hover:bg-[#163A24]/5 hover:text-[#163A24]"
-                    >
-                      My Enquiries
-                    </Link>
-                  </>
-                )}
-
+            {/* Logged in admin shortcut if authenticated */}
+            {user && isAdmin && (
+              <div className="pt-3 px-3 pb-1 border-t border-[#123D27]/50 space-y-1">
+                <Link
+                  to={isSuperAdmin ? '/super-admin' : '/admin'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-lg text-xs font-semibold text-[#C4E85A] bg-[#123D27]"
+                >
+                  Admin Portal ({isSuperAdmin ? 'Super Admin' : 'Nursery Admin'})
+                </Link>
                 <button
+                  type="button"
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                  className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 hover:bg-red-950/30"
                 >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            ) : (
-              <div className="pt-3 px-3 pb-1 border-t border-[#163A24]/10">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setLoginModalOpen(true);
-                  }}
-                  className="flex items-center justify-center space-x-2 w-full py-2.5 px-4 rounded-lg bg-[#163A24] text-[#F7F5EE] hover:bg-[#0B2115] text-xs font-semibold tracking-wide transition-colors cursor-pointer"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span>Login</span>
+                  Logout
                 </button>
               </div>
             )}
           </div>
         )}
       </div>
-
-      {/* Floating Login Modal with background blur over homepage */}
-      <LoginModal
-        isOpen={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-      />
     </header>
   );
 };

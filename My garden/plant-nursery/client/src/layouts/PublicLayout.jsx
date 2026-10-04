@@ -1,10 +1,16 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { MessageCircle } from 'lucide-react';
 
 export const PublicLayout = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
   const whatsappNumber = "919447312890";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hello Kinattukara Nutmeg Nursery, I would like to enquire about your plant collection."
@@ -23,7 +29,7 @@ export const PublicLayout = () => {
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 bg-[#163A24] hover:bg-[#0B2115] text-[#F7F5EE] p-3.5 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-300 hover:scale-105 border border-[#F7F5EE]/20 group"
+        className="fixed bottom-[18px] right-[18px] sm:bottom-[24px] sm:right-[28px] z-40 bg-[#0B2419] hover:bg-[#123D27] text-[#F2F0E5] p-3 rounded-full shadow-xl flex items-center space-x-2 transition-all duration-300 hover:scale-105 border border-[#C4E85A]/30 group"
         title="Enquire on WhatsApp"
       >
         <MessageCircle className="w-5 h-5 text-[#4ade80]" />

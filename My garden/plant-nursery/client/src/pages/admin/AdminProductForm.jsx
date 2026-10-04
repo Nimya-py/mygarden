@@ -60,6 +60,23 @@ export const AdminProductForm = () => {
                 stockStatus: prod.stockStatus || 'IN_STOCK',
                 featured: Boolean(prod.featured),
               });
+            } else {
+              const publicRes = await API.get('/products');
+              if (publicRes.data.success) {
+                const p = publicRes.data.data.find((item) => item._id === id);
+                if (p) {
+                  setFormData({
+                    name: p.name,
+                    category: p.category?._id || p.category,
+                    description: p.description || '',
+                    price: p.price,
+                    salePrice: p.salePrice || '',
+                    images: p.images && p.images.length > 0 ? p.images : [''],
+                    stockStatus: p.stockStatus || 'IN_STOCK',
+                    featured: Boolean(p.featured),
+                  });
+                }
+              }
             }
           }
         }

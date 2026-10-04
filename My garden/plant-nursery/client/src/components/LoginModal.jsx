@@ -82,7 +82,7 @@ export const LoginModal = ({ isOpen, onClose }) => {
       aria-labelledby="login-modal-title"
     >
       <div
-        className="w-full max-w-md bg-[#FFFFFF] rounded-2xl border border-[#163A24]/15 shadow-2xl p-7 sm:p-9 relative my-auto animate-fadeIn"
+        className="w-full max-w-md bg-[#FFFFFF] rounded-2xl border border-[#163A24]/15 shadow-2xl p-7 sm:p-9 relative my-auto animate-fadeIn max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -125,11 +125,12 @@ export const LoginModal = ({ isOpen, onClose }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-[#172018] mb-1.5">
+            <label htmlFor="login-email" className="block text-xs font-semibold text-[#172018] mb-1.5">
               Email Address
             </label>
             <div className="relative">
               <input
+                id="login-email"
                 type="email"
                 required
                 autoFocus
@@ -143,11 +144,12 @@ export const LoginModal = ({ isOpen, onClose }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#172018] mb-1.5">
+            <label htmlFor="login-password" className="block text-xs font-semibold text-[#172018] mb-1.5">
               Password
             </label>
             <div className="relative">
               <input
+                id="login-password"
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
@@ -161,6 +163,7 @@ export const LoginModal = ({ isOpen, onClose }) => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3.5 top-3 text-[#647563] hover:text-[#0B2115]"
                 tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>

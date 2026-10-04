@@ -51,7 +51,7 @@ export function App() {
             <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/plants" element={<Plants />} />
+            <Route path="/plants" element={<Navigate to="/plants/nutmeg" replace />} />
             
             {/* Category & Nutmeg Propagation Routes */}
             <Route path="/plants/nutmeg" element={<Plants />} />
