@@ -1,6 +1,6 @@
 import express from 'express';
 import { Testimonial } from '../models/Testimonial.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -98,7 +98,7 @@ router.post('/', async (req, res, next) => {
 // @desc    Get all testimonials for Admin (includes pending, approved, rejected)
 // @route   GET /api/testimonials/admin
 // @access  Private (Admin / Super Admin)
-router.get('/admin', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res, next) => {
+router.get('/admin', requireAdmin, async (req, res, next) => {
   try {
     const testimonials = await Testimonial.find().sort({ createdAt: -1 });
     return res.status(200).json({
@@ -113,7 +113,7 @@ router.get('/admin', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (req
 // @desc    Directly create a testimonial by Admin (auto-approved)
 // @route   POST /api/testimonials/admin
 // @access  Private (Admin / Super Admin)
-router.post('/admin', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res, next) => {
+router.post('/admin', requireAdmin, async (req, res, next) => {
   try {
     const { name, place, district, phone, cultivation, plantationAge, rating, comment, isFeatured, status } = req.body;
 
@@ -150,7 +150,7 @@ router.post('/admin', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (re
 // @desc    Update a testimonial
 // @route   PUT /api/testimonials/:id
 // @access  Private (Admin / Super Admin)
-router.put('/:id', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res, next) => {
+router.put('/:id', requireAdmin, async (req, res, next) => {
   try {
     const { name, place, district, phone, cultivation, plantationAge, rating, comment, status, isFeatured } = req.body;
 
@@ -188,7 +188,7 @@ router.put('/:id', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (req, 
 // @desc    Approve / Reject testimonial status
 // @route   PATCH /api/testimonials/:id/status
 // @access  Private (Admin / Super Admin)
-router.patch('/:id/status', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res, next) => {
+router.patch('/:id/status', requireAdmin, async (req, res, next) => {
   try {
     const { status } = req.body;
     if (!['pending', 'approved', 'rejected'].includes(status)) {
@@ -224,7 +224,7 @@ router.patch('/:id/status', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), asy
 // @desc    Delete a testimonial
 // @route   DELETE /api/testimonials/:id
 // @access  Private (Admin / Super Admin)
-router.delete('/:id', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res, next) => {
+router.delete('/:id', requireAdmin, async (req, res, next) => {
   try {
     const testimonial = await Testimonial.findByIdAndDelete(req.params.id);
     if (!testimonial) {

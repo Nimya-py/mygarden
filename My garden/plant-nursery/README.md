@@ -59,13 +59,18 @@ npm run dev      # Starts frontend on http://localhost:5173
 
 ---
 
-## 🔑 Demo Login Credentials
+## 🔑 Administrator Authentication & Setup
 
-| Role | Email | Password | Access Level |
-|---|---|---|---|
-| **SUPER ADMIN** | `superadmin@plantnursery.com` | `SuperAdmin123!` | Manage all nurseries, approval/rejection, users, categories |
-| **NURSERY ADMIN** | `admin@greenleaf.com` | `NurseryAdmin123!` | Manage own nursery profile, products, customer enquiries |
-| **CUSTOMER** | `arjun@example.com` | `Customer123!` | Browse sanctuary plants, search, filter, submit enquiries |
+Administrator accounts are never registered through the public frontend. Initial admin provisioning is securely driven through server-side environment variables in `server/.env`:
+
+```env
+ADMIN_EMAIL=admin@kinattukara.com
+ADMIN_PASSWORD="YourStrongPassword123!#"
+```
+
+- Passwords are strictly hashed with bcrypt (work factor 12).
+- Admin authentication portal is private: `/admin/login`
+- Public website contains **no** login button.
 
 ---
 

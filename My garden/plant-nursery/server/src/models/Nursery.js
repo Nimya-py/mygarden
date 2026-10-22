@@ -120,12 +120,13 @@ const nurserySchema = new mongoose.Schema(
     },
     isApproved: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Nursery must have an owner'],
+      required: false,
+      default: null,
     },
   },
   {

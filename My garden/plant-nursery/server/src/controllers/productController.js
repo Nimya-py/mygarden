@@ -57,15 +57,10 @@ export const getProducts = async (req, res, next) => {
       .populate('nursery', 'name slug city state whatsapp phone isApproved')
       .populate('category', 'name slug');
 
-    // Only show products from approved nurseries in public view unless super admin
-    const filteredProducts = req.user?.role === 'SUPER_ADMIN'
-      ? products
-      : products.filter((p) => p.nursery && p.nursery.isApproved !== false);
-
     res.status(200).json({
       success: true,
-      count: filteredProducts.length,
-      data: filteredProducts,
+      count: products.length,
+      data: products,
     });
   } catch (error) {
     next(error);
@@ -102,7 +97,10 @@ export const getProductBySlug = async (req, res, next) => {
 // @access  Private (ADMIN)
 export const getMyProducts = async (req, res, next) => {
   try {
-    const nursery = await Nursery.findOne({ owner: req.user._id });
+    let nursery = await Nursery.findOne({ owner: req.user._id });
+    if (!nursery) {
+      nursery = await Nursery.findOne();
+    }
     if (!nursery) {
       return res.status(200).json({
         success: true,
@@ -111,7 +109,7 @@ export const getMyProducts = async (req, res, next) => {
       });
     }
 
-    const products = await Product.find({ nursery: nursery._id })
+    const products = await Product.find()
       .populate('category', 'name slug')
       .populate('nursery', 'name slug');
 
@@ -132,12 +130,13 @@ export const createProduct = async (req, res, next) => {
   try {
     const { name, category, description, price, salePrice, images, stockStatus, featured } = req.body;
 
-    // Find nursery for logged-in user
-    let nurseryId;
-    if (req.user.role === 'SUPER_ADMIN' && req.body.nursery) {
-      nurseryId = req.body.nursery;
-    } else {
-      const nursery = await Nursery.findOne({ owner: req.user._id });
+    // Find nursery for single nursery setup
+    let nurseryId = req.body.nursery;
+    if (!nurseryId) {
+      let nursery = await Nursery.findOne({ owner: req.user._id });
+      if (!nursery) {
+        nursery = await Nursery.findOne();
+      }
       if (!nursery) {
         return res.status(400).json({
           success: false,
@@ -197,11 +196,8 @@ export const updateProduct = async (req, res, next) => {
       });
     }
 
-    // Security Isolation: Verify ownership
-    if (
-      req.user.role !== 'SUPER_ADMIN' &&
-      (!product.nursery || product.nursery.owner.toString() !== req.user._id.toString())
-    ) {
+    // Role authorization: Any Admin or Super Admin can edit products in this nursery
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: 'Forbidden: You do not have permission to modify this product.',
@@ -253,11 +249,8 @@ export const deleteProduct = async (req, res, next) => {
       });
     }
 
-    // Security Isolation: Verify ownership
-    if (
-      req.user.role !== 'SUPER_ADMIN' &&
-      (!product.nursery || product.nursery.owner.toString() !== req.user._id.toString())
-    ) {
+    // Role authorization: Any Admin or Super Admin can delete products
+    if (!['ADMIN', 'SUPER_ADMIN'].includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: 'Forbidden: You do not have permission to delete this product.',

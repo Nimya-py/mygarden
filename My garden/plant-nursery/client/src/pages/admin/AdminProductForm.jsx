@@ -9,6 +9,8 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   Sparkles,
+  Upload,
+  Loader2,
 } from 'lucide-react';
 import API from '../../services/api';
 
@@ -32,6 +34,10 @@ export const AdminProductForm = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [uploadingIndex, setUploadingIndex] = useState(null);
+  const [multiUploading, setMultiUploading] = useState(false);
+  const fileInputRefs = React.useRef({});
+  const multiInputRef = React.useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,6 +109,62 @@ export const AdminProductForm = () => {
   const removeImageField = (index) => {
     const updated = formData.images.filter((_, i) => i !== index);
     setFormData({ ...formData, images: updated.length ? updated : [''] });
+  };
+
+  const handleSingleFileUpload = async (index, file) => {
+    if (!file) return;
+    setUploadingIndex(index);
+    setError('');
+
+    try {
+      const data = new FormData();
+      data.append('file', file);
+      data.append('folder', 'products');
+
+      const res = await API.post('/upload', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data?.success && res.data?.data?.url) {
+        handleImageChange(index, res.data.data.url);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to upload image file.');
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  const handleMultiFileUpload = async (files) => {
+    if (!files || files.length === 0) return;
+    setMultiUploading(true);
+    setError('');
+
+    try {
+      const data = new FormData();
+      Array.from(files).forEach((file) => {
+        data.append('files', file);
+      });
+      data.append('folder', 'products');
+
+      const res = await API.post('/upload/multiple', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data?.success && Array.isArray(res.data?.data)) {
+        const newUrls = res.data.data.map((item) => item.url);
+        const existing = formData.images.filter((img) => img.trim() !== '');
+        setFormData({
+          ...formData,
+          images: [...existing, ...newUrls],
+        });
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to batch upload images.');
+    } finally {
+      setMultiUploading(false);
+      if (multiInputRef.current) multiInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -309,7 +371,7 @@ export const AdminProductForm = () => {
 
           <div className="space-y-3">
             {formData.images.map((img, idx) => (
-              <div key={idx} className="flex items-center space-x-3">
+              <div key={idx} className="flex items-center space-x-2.5">
                 {/* Visual Thumbnail Preview if valid URL */}
                 <div className="w-11 h-11 rounded-lg border border-[#D6DDD5] bg-[#FAFBF9] flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
                   {img && img.trim() ? (
@@ -331,10 +393,42 @@ export const AdminProductForm = () => {
                     type="text"
                     value={img}
                     onChange={(e) => handleImageChange(idx, e.target.value)}
-                    placeholder="/images/cat-nutmeg.jpg or https://images.unsplash.com/..."
-                    className="w-full bg-white border border-[#D6DDD5] rounded-xl px-4 py-2.5 text-xs text-[#172018] placeholder-[#9CA3AF] focus:outline-none focus:border-[#163A24] focus:ring-1 focus:ring-[#163A24]/15 transition-all shadow-2xs"
+                    placeholder="/uploads/... or /images/... or https://..."
+                    className="w-full bg-white border border-[#D6DDD5] rounded-xl px-4 py-2 text-xs text-[#172018] placeholder-[#9CA3AF] focus:outline-none focus:border-[#163A24] focus:ring-1 focus:ring-[#163A24]/15 transition-all shadow-2xs"
                   />
                 </div>
+
+                {/* Per-item File Upload Button */}
+                <input
+                  type="file"
+                  ref={(el) => (fileInputRefs.current[idx] = el)}
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleSingleFileUpload(idx, f);
+                  }}
+                  className="hidden"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRefs.current[idx]?.click()}
+                  disabled={uploadingIndex === idx}
+                  className="px-3 py-2 bg-[#EAF0E8] hover:bg-[#D6E3D3] text-[#163A24] rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors shrink-0 disabled:opacity-50"
+                  title="Upload from device"
+                >
+                  {uploadingIndex === idx ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span className="hidden sm:inline">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Upload File</span>
+                    </>
+                  )}
+                </button>
 
                 {formData.images.length > 1 && (
                   <button
@@ -349,14 +443,51 @@ export const AdminProductForm = () => {
               </div>
             ))}
 
-            <button
-              type="button"
-              onClick={addImageField}
-              className="inline-flex items-center space-x-1.5 text-xs font-semibold text-[#163A24] hover:text-[#0B2115] hover:underline pt-1"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Another Image Field</span>
-            </button>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={addImageField}
+                className="inline-flex items-center space-x-1.5 text-xs font-semibold text-[#163A24] hover:text-[#0B2115] hover:underline"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Another Image Field</span>
+              </button>
+
+              <span className="text-[#D6DDD5] hidden sm:inline">|</span>
+
+              {/* Batch Upload Input */}
+              <input
+                type="file"
+                ref={multiInputRef}
+                multiple
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  if (e.target.files?.length) {
+                    handleMultiFileUpload(e.target.files);
+                  }
+                }}
+                className="hidden"
+              />
+
+              <button
+                type="button"
+                onClick={() => multiInputRef.current?.click()}
+                disabled={multiUploading}
+                className="inline-flex items-center space-x-1.5 text-xs font-semibold text-[#163A24] bg-[#F2F6F1] hover:bg-[#E2EDE0] border border-[#CCDBC9] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {multiUploading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Uploading multiple...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Batch Upload Multiple Photos</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </section>
 

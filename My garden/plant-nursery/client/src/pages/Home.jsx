@@ -1,10 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Sparkles, Tag, Package, Check } from 'lucide-react';
 import { useNursery } from '../context/NurseryContext';
+import API from '../services/api';
 
 export const Home = () => {
   const { nursery } = useNursery();
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await API.get('/products?featured=true');
+        if (res.data?.success && res.data?.data) {
+          if (res.data.data.length > 0) {
+            setFeaturedProducts(res.data.data.slice(0, 8));
+          } else {
+            // Fallback to top products if none marked featured yet
+            const allRes = await API.get('/products');
+            if (allRes.data?.success) {
+              setFeaturedProducts(allRes.data.data.slice(0, 8));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load featured products for homepage:', err);
+      } finally {
+        setLoadingFeatured(false);
+      }
+    };
+
+    fetchFeatured();
+  }, []);
 
   return (
     <div className="bg-[#071C14] text-[#F2F0E5] font-sans overflow-x-hidden selection:bg-[#C4E85A] selection:text-[#071C14]">
@@ -18,19 +46,18 @@ export const Home = () => {
           - "KINATTUKARA." → cream/off-white (#F2F0E5)
           - "A LEGACY OF" → lime/leaf green accent (#C4E85A)
           - "NUTMEG." → cream/off-white (#F2F0E5)
-          - Right: Nutmeg hero image with smooth dark green gradient blend
-          - No extra CTA clutter, spacious and confident
+          - Right: Nutmeg hero image with smooth dark green gradient blend (customizable from backend)
          ================================================== */}
       <section className="relative min-h-[90vh] lg:min-h-screen flex items-center bg-[#071C14] overflow-hidden">
         
         {/* Ambient Dark Forest Lighting */}
         <div className="absolute inset-0 z-0 bg-radial from-[#123D27]/30 via-[#071C14] to-[#04110C] pointer-events-none" />
 
-        {/* Right Side Botanical Hero Image */}
+        {/* Right Side Botanical Hero Image (Dynamically from Backend Nursery Cover Image) */}
         <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[60%] xl:w-[56%] z-0 pointer-events-none overflow-hidden flex items-center justify-end">
           <img
-            src="/images/hero-nutmeg.jpg"
-            alt="Kinattukara mature nutmeg fruit on branch with crimson mace"
+            src={nursery?.coverImage || "/images/hero-nutmeg.jpg"}
+            alt={nursery?.name || "Kinattukara mature nutmeg fruit on branch with crimson mace"}
             className="w-full h-full object-cover object-center lg:object-right transform scale-100 lg:scale-[1.02] transition-transform duration-700"
             style={{
               filter: 'brightness(1.04) contrast(1.05) saturate(1.08)',
@@ -210,6 +237,157 @@ export const Home = () => {
             </div>
 
           </div>
+
+        </div>
+      </section>
+
+      {/* ==================================================
+          3.5. DYNAMIC FEATURED SPECIMENS SECTION (Live from Backend)
+          - Renders plants marked "featured: true" in Admin Catalog
+          - Live updates when admin creates, edits, or uploads photos
+         ================================================== */}
+      <section className="py-20 sm:py-24 lg:py-28 bg-[#04110C] border-t border-[#123D27]/40 relative">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 xl:px-14 space-y-12">
+          
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#123D27]/50 pb-8">
+            <div className="space-y-3 max-w-2xl">
+              <div className="inline-flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-[#C4E85A] animate-pulse" />
+                <span className="font-display text-xs sm:text-[13px] font-bold tracking-[0.25em] text-[#C4E85A] uppercase">
+                  LIVE NURSERY SPECIMENS
+                </span>
+              </div>
+              <h2 className="font-display text-[34px] sm:text-[46px] lg:text-[54px] font-extrabold text-[#F2F0E5] leading-[0.98] tracking-[-0.035em] uppercase">
+                FEATURED CULTIVARS & <br />
+                <span className="text-[#C4E85A]">GRAFTED SAPLINGS.</span>
+              </h2>
+              <p className="text-sm sm:text-base text-[#D8D9C9]/80 font-normal leading-relaxed">
+                Handpicked mother-branch saplings acclimated and propagated at Kinattukara.
+              </p>
+            </div>
+
+            <Link
+              to="/plants"
+              className="group inline-flex items-center space-x-2 text-xs sm:text-sm font-bold tracking-wider text-[#C4E85A] hover:text-[#F2F0E5] uppercase transition-colors shrink-0"
+            >
+              <span>EXPLORE ALL PLANTS</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+            </Link>
+          </div>
+
+          {/* Grid of Dynamic Featured Plants */}
+          {loadingFeatured ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((n) => (
+                <div
+                  key={n}
+                  className="bg-[#0B2419]/60 border border-[#123D27] rounded-[16px] p-4 space-y-3 animate-pulse"
+                >
+                  <div className="aspect-[4/3] bg-[#123D27]/40 rounded-xl" />
+                  <div className="h-4 bg-[#123D27]/50 rounded-sm w-3/4" />
+                  <div className="h-3 bg-[#123D27]/30 rounded-sm w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((prod) => {
+                const imageSrc =
+                  prod.images && prod.images.length > 0 && prod.images[0]
+                    ? prod.images[0]
+                    : '/images/hero-nutmeg.jpg';
+
+                const categoryName =
+                  typeof prod.category === 'object'
+                    ? prod.category?.name
+                    : 'Nutmeg Sapling';
+
+                return (
+                  <Link
+                    key={prod._id || prod.slug}
+                    to={`/plant/${prod.slug}`}
+                    className="group bg-[#0B2419] hover:bg-[#0D2D1F] border border-[#123D27] hover:border-[#C4E85A]/50 rounded-[16px] overflow-hidden transition-all duration-300 shadow-xl flex flex-col justify-between"
+                  >
+                    <div>
+                      {/* Image Preview with Floating Badges */}
+                      <div className="relative aspect-[4/3] overflow-hidden bg-[#071C14]">
+                        <img
+                          src={imageSrc}
+                          alt={prod.name}
+                          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.currentTarget.src = '/images/hero-nutmeg.jpg';
+                          }}
+                        />
+
+                        {/* Top Badges */}
+                        <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-[#C4E85A] bg-[#071C14]/85 px-2.5 py-1 rounded-full backdrop-blur-xs border border-[#123D27]">
+                            {categoryName}
+                          </span>
+                          {prod.stockStatus === 'IN_STOCK' && (
+                            <span className="text-[10px] font-mono text-[#D8D9C9] bg-[#071C14]/85 px-2 py-0.5 rounded-full backdrop-blur-xs border border-[#123D27]">
+                              In Stock
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-4 sm:p-5 space-y-2">
+                        <h3 className="font-display text-base sm:text-lg font-bold text-[#F2F0E5] group-hover:text-[#C4E85A] transition-colors uppercase leading-tight line-clamp-1">
+                          {prod.name}
+                        </h3>
+
+                        {prod.description && (
+                          <p className="text-xs text-[#D8D9C9]/70 line-clamp-2 leading-relaxed">
+                            {prod.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Price and Action Footer */}
+                    <div className="p-4 sm:p-5 pt-0 border-t border-[#123D27]/60 flex items-center justify-between">
+                      <div className="flex items-baseline space-x-2">
+                        {prod.salePrice ? (
+                          <>
+                            <span className="font-bold text-[#C4E85A] text-base">
+                              ₹{prod.salePrice}
+                            </span>
+                            <span className="line-through text-[#8E9B8D] text-xs">
+                              ₹{prod.price}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="font-bold text-[#F2F0E5] text-base">
+                            ₹{prod.price}
+                          </span>
+                        )}
+                      </div>
+
+                      <span className="inline-flex items-center space-x-1 text-xs font-bold text-[#C4E85A] group-hover:translate-x-0.5 transition-transform">
+                        <span>Details</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12 border border-dashed border-[#123D27] rounded-2xl bg-[#0B2419]/30">
+              <Package className="w-8 h-8 text-[#C4E85A] mx-auto mb-2 opacity-70" />
+              <p className="text-sm text-[#D8D9C9]">No specimens marked as featured yet.</p>
+              <Link
+                to="/plants"
+                className="text-xs font-bold text-[#C4E85A] hover:underline mt-2 inline-block"
+              >
+                Browse catalog →
+              </Link>
+            </div>
+          )}
 
         </div>
       </section>

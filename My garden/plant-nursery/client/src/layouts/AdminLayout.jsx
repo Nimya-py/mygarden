@@ -28,32 +28,22 @@ export const AdminLayout = () => {
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
-  const superAdminNav = [
-    { label: 'Platform Overview', path: '/super-admin', icon: LayoutDashboard },
-    { label: 'All Nurseries', path: '/super-admin/nurseries', icon: Store },
-    { label: 'Awards (ISO 9001)', path: '/admin/awards', icon: Award },
-    { label: 'Customer Reviews', path: '/admin/testimonials', icon: Star },
-    { label: 'Nursery Admins', path: '/super-admin/admins', icon: ShieldCheck },
-    { label: 'Customers', path: '/super-admin/customers', icon: Users },
-    { label: 'Categories', path: '/super-admin/categories', icon: Grid },
-    { label: 'Global Enquiries', path: '/super-admin/enquiries', icon: MessageSquare },
-  ];
-
-  const adminNav = [
+  const unifiedNav = [
     { label: 'Nursery Dashboard', path: '/admin', icon: LayoutDashboard },
-    { label: 'Awards (ISO 9001)', path: '/admin/awards', icon: Award },
-    { label: 'Customer Reviews', path: '/admin/testimonials', icon: Star },
     { label: 'Products Catalog', path: '/admin/products', icon: Package },
     { label: 'Add New Product', path: '/admin/products/new', icon: Grid },
+    { label: 'Plant Categories', path: '/admin/categories', icon: Grid },
     { label: 'Customer Enquiries', path: '/admin/enquiries', icon: MessageSquare },
-    { label: 'Nursery Profile', path: '/admin/settings', icon: Settings },
+    { label: 'Customer Reviews', path: '/admin/testimonials', icon: Star },
+    { label: 'Awards (ISO 9001)', path: '/admin/awards', icon: Award },
+    { label: 'Nursery Profile & Settings', path: '/admin/settings', icon: Settings },
   ];
 
-  const navItems = isSuperAdmin ? superAdminNav : adminNav;
+  const navItems = unifiedNav;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/admin/login');
   };
 
   return (

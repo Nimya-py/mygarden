@@ -6,7 +6,14 @@ import { Nursery } from '../models/Nursery.js';
 // @access  Public
 export const createEnquiry = async (req, res, next) => {
   try {
-    const { nursery, product, name, phone, email, message } = req.body;
+    let { nursery, product, name, phone, email, message } = req.body;
+
+    if (!nursery) {
+      const defaultNursery = await Nursery.findOne();
+      if (defaultNursery) {
+        nursery = defaultNursery._id;
+      }
+    }
 
     if (!nursery || !name || !phone || !message) {
       return res.status(400).json({
@@ -43,7 +50,10 @@ export const getEnquiries = async (req, res, next) => {
     let filter = {};
 
     if (req.user.role === 'ADMIN') {
-      const nursery = await Nursery.findOne({ owner: req.user._id });
+      let nursery = await Nursery.findOne({ owner: req.user._id });
+      if (!nursery) {
+        nursery = await Nursery.findOne();
+      }
       if (!nursery) {
         return res.status(200).json({
           success: true,
@@ -85,15 +95,18 @@ export const updateEnquiryStatus = async (req, res, next) => {
       });
     }
 
-    // Role Security: Admin can only update status of enquiries belonging to their own nursery
-    if (
-      req.user.role !== 'SUPER_ADMIN' &&
-      (!enquiry.nursery || enquiry.nursery.owner.toString() !== req.user._id.toString())
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: 'Forbidden: You cannot modify enquiries for another nursery.',
-      });
+    // Role Security: Admin can modify enquiries for their managed nursery
+    if (req.user.role !== 'SUPER_ADMIN') {
+      const adminNursery =
+        (await Nursery.findOne({ owner: req.user._id })) || (await Nursery.findOne());
+      const enquiryNurseryId = enquiry.nursery?._id?.toString() || enquiry.nursery?.toString();
+
+      if (adminNursery && enquiryNurseryId && adminNursery._id.toString() !== enquiryNurseryId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden: You cannot modify enquiries for another nursery.',
+        });
+      }
     }
 
     if (!['PENDING', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(status)) {
@@ -130,15 +143,18 @@ export const deleteEnquiry = async (req, res, next) => {
       });
     }
 
-    // Role Security: Admin can only delete enquiries belonging to their own nursery
-    if (
-      req.user.role !== 'SUPER_ADMIN' &&
-      (!enquiry.nursery || enquiry.nursery.owner.toString() !== req.user._id.toString())
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: 'Forbidden: You cannot delete enquiries for another nursery.',
-      });
+    // Role Security: Admin can delete enquiries for their managed nursery
+    if (req.user.role !== 'SUPER_ADMIN') {
+      const adminNursery =
+        (await Nursery.findOne({ owner: req.user._id })) || (await Nursery.findOne());
+      const enquiryNurseryId = enquiry.nursery?._id?.toString() || enquiry.nursery?.toString();
+
+      if (adminNursery && enquiryNurseryId && adminNursery._id.toString() !== enquiryNurseryId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden: You cannot delete enquiries for another nursery.',
+        });
+      }
     }
 
     await enquiry.deleteOne();

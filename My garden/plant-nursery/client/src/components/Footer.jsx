@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useNursery } from '../context/NurseryContext';
+import { getWhatsAppUrl } from '../utils/whatsapp';
 
 export const Footer = () => {
   const { nursery } = useNursery();
@@ -11,6 +12,13 @@ export const Footer = () => {
   const displayAddress = nursery?.address
     ? `${nursery.address}, ${nursery.city || ''}, ${nursery.state || 'Kerala'}`
     : 'Kinattukara, Thrissur / Palakkad Highway, Thrissur, Kerala';
+
+  const nurseryName = nursery?.name || 'Kinattukara Nutmeg Plantation & Nursery';
+  const rawWhatsapp = nursery?.whatsapp || nursery?.phone || '919447312890';
+  const footerWhatsappUrl = getWhatsAppUrl(
+    rawWhatsapp,
+    `Hello ${nurseryName}, I would like to enquire about your nutmeg plants and saplings.`
+  );
 
   const instagramUrl = nursery?.socialLinks?.instagram || 'https://www.instagram.com';
   const facebookUrl = nursery?.socialLinks?.facebook || 'https://www.facebook.com';
@@ -105,9 +113,7 @@ export const Footer = () => {
 
                 {/* 3. WhatsApp */}
                 <a
-                  href={`https://wa.me/${(nursery?.whatsapp || '919447312890').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                    'Hello Kinattukara Nutmeg Plantation & Nursery, I would like to enquire about your plants.'
-                  )}`}
+                  href={footerWhatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Chat on WhatsApp"
@@ -198,6 +204,9 @@ export const Footer = () => {
                 </Link>
                 <Link to="/awards" className="font-medium text-[#D8D9C9] hover:text-[#C4E85A] transition-colors">
                   Awards
+                </Link>
+                <Link to="/testimonials" className="font-medium text-[#D8D9C9] hover:text-[#C4E85A] transition-colors">
+                  Testimonials
                 </Link>
                 <Link to="/contact" className="font-medium text-[#D8D9C9] hover:text-[#C4E85A] transition-colors">
                   Contact

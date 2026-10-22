@@ -259,6 +259,10 @@ export const Plants = () => {
     { label: 'Appicotail Grafting', link: '/plants/appicotail-grafting', slug: 'appicotail-grafting' },
   ];
 
+  const inStockCount = products.filter((p) =>
+    p.stockStatus ? p.stockStatus === 'IN_STOCK' : p.inStock !== false
+  ).length;
+
   return (
     <div className="bg-[#071C14] text-[#F2F0E5] selection:bg-[#C4E85A] selection:text-[#071C14] min-h-screen">
 
@@ -381,9 +385,21 @@ export const Plants = () => {
             })}
           </div>
 
-          <span className="text-[11px] font-mono text-[#D8D9C9]/60 uppercase hidden lg:inline tracking-wider shrink-0">
-            {products.length} VARIETIES IN STOCK
-          </span>
+          <div className="flex items-center space-x-2 shrink-0">
+            {inStockCount > 0 ? (
+              <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#123D27]/80 border border-[#123D27] text-[11px] font-mono font-bold text-[#C4E85A] uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-[#C4E85A] inline-block animate-pulse" />
+                <span>
+                  {inStockCount} {inStockCount === 1 ? 'VARIETY' : 'VARIETIES'} IN STOCK
+                </span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-red-950/60 border border-red-900/60 text-[11px] font-mono font-bold text-red-400 uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+                <span>OUT OF STOCK</span>
+              </span>
+            )}
+          </div>
 
         </div>
       </section>
@@ -429,6 +445,7 @@ export const Plants = () => {
                 const desc = item.description;
                 const price = item.salePrice || item.price;
                 const itemSlug = item.slug || item.id || `plant-${encodeURIComponent(name.toLowerCase().replace(/\s+/g, '-'))}`;
+                const isItemInStock = item.stockStatus ? item.stockStatus === 'IN_STOCK' : item.inStock !== false;
                 const waText = `Hello Kinattukara Nursery, I would like to inquire about purchasing: ${name} (₹${price}). Is this in stock for plantation dispatch or nursery pickup?`;
                 const itemWaUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waText)}`;
 
@@ -456,6 +473,17 @@ export const Plants = () => {
                           </span>
                         </div>
                       )}
+
+                      {/* Stock Status Badge from Backend */}
+                      <div className="absolute top-3 right-3">
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border backdrop-blur-md shadow-sm ${
+                          isItemInStock
+                            ? 'bg-[#071C14]/90 text-[#C4E85A] border-[#123D27]'
+                            : 'bg-red-950/90 text-red-200 border-red-800'
+                        }`}>
+                          {isItemInStock ? 'IN STOCK' : 'OUT OF STOCK'}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Content Section */}
@@ -483,8 +511,11 @@ export const Plants = () => {
                             ₹{price}
                             <span className="text-[11px] font-normal text-[#172018]/60 font-sans ml-1">/ sapling</span>
                           </span>
-                          <span className="text-[11px] font-mono text-[#084F09] font-bold uppercase">
-                            VERIFIED GRAFT
+                          <span className={`text-[11px] font-mono font-bold uppercase flex items-center space-x-1.5 ${
+                            isItemInStock ? 'text-[#084F09]' : 'text-red-700'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isItemInStock ? 'bg-[#084F09]' : 'bg-red-600'}`} />
+                            <span>{isItemInStock ? 'IN STOCK' : 'OUT OF STOCK'}</span>
                           </span>
                         </div>
 

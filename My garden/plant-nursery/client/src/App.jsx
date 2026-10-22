@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { NurseryProvider } from './context/NurseryContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Layouts
@@ -18,12 +19,15 @@ import { Gallery } from './pages/Gallery';
 import { Contact } from './pages/Contact';
 import { Awards } from './pages/Awards';
 import { UsesOfNutmeg } from './pages/UsesOfNutmeg';
+import { Testimonials } from './pages/Testimonials';
 
-// Auth Pages
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
+// Admin Authentication Pages (Separated from public layout, no public navbar login)
+import { AdminLogin } from './pages/admin/AdminLogin';
+import { AdminVerifyEmail } from './pages/admin/AdminVerifyEmail';
+import { AdminForgotPassword } from './pages/admin/AdminForgotPassword';
+import { AdminResetPassword } from './pages/admin/AdminResetPassword';
 
-// Admin Pages
+// Protected Admin Dashboard Pages
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminProducts } from './pages/admin/AdminProducts';
 import { AdminProductForm } from './pages/admin/AdminProductForm';
@@ -31,15 +35,7 @@ import { AdminEnquiries } from './pages/admin/AdminEnquiries';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminAwards } from './pages/admin/AdminAwards';
 import { AdminTestimonials } from './pages/admin/AdminTestimonials';
-
-// Super Admin Pages
-import { SuperAdminDashboard } from './pages/superadmin/SuperAdminDashboard';
-import { SuperAdminNurseries } from './pages/superadmin/SuperAdminNurseries';
-import { SuperAdminUsers } from './pages/superadmin/SuperAdminUsers';
 import { SuperAdminCategories } from './pages/superadmin/SuperAdminCategories';
-import { SuperAdminEnquiries } from './pages/superadmin/SuperAdminEnquiries';
-
-import { NurseryProvider } from './context/NurseryContext';
 
 export function App() {
   return (
@@ -47,74 +43,70 @@ export function App() {
       <NurseryProvider>
         <Router>
           <Routes>
-            {/* Public Routes wrapped in PublicLayout */}
+            {/* 1. Public Visitor Routes wrapped in PublicLayout (NO LOGIN BUTTON IN NAVBAR) */}
             <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/plants" element={<Navigate to="/plants/nutmeg" replace />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/plants" element={<Navigate to="/plants/nutmeg" replace />} />
+              
+              {/* Category & Propagation Routes */}
+              <Route path="/plants/nutmeg" element={<Plants />} />
+              <Route path="/plants/skin-patch-bud" element={<Plants />} />
+              <Route path="/plants/crown-bud" element={<Plants />} />
+              <Route path="/plants/approach-grafting" element={<Plants />} />
+              <Route path="/plants/appicotail-grafting" element={<Plants />} />
+              <Route path="/plants/:categorySlug" element={<Plants />} />
+              <Route path="/categories/:slug" element={<Plants />} />
+              
+              <Route path="/plant/:slug" element={<PlantDetail />} />
+              <Route path="/nursery/:slug" element={<NurseryDetail />} />
+              <Route path="/planting-tips" element={<PlantCare />} />
+              <Route path="/plant-care" element={<PlantCare />} />
+              <Route path="/nutmeg/uses" element={<UsesOfNutmeg />} />
+              <Route path="/uses-of-nutmeg" element={<UsesOfNutmeg />} />
+              <Route path="/awards" element={<Awards />} />
+              <Route path="/testimonials" element={<Testimonials />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/contact" element={<Contact />} />
+            </Route>
+
+            {/* 2. Public Admin Authentication Endpoints (Accessible separately at /admin/login) */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/verify-email" element={<AdminVerifyEmail />} />
+            <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
+            <Route path="/admin/reset-password" element={<AdminResetPassword />} />
             
-            {/* Category & Nutmeg Propagation Routes */}
-            <Route path="/plants/nutmeg" element={<Plants />} />
-            <Route path="/plants/skin-patch-bud" element={<Plants />} />
-            <Route path="/plants/crown-bud" element={<Plants />} />
-            <Route path="/plants/approach-grafting" element={<Plants />} />
-            <Route path="/plants/appicotail-grafting" element={<Plants />} />
-            <Route path="/plants/:categorySlug" element={<Plants />} />
-            <Route path="/categories/:slug" element={<Plants />} />
-            
-            <Route path="/plant/:slug" element={<PlantDetail />} />
-            <Route path="/nursery/:slug" element={<NurseryDetail />} />
-            <Route path="/planting-tips" element={<PlantCare />} />
-            <Route path="/plant-care" element={<PlantCare />} />
-            <Route path="/nutmeg/uses" element={<UsesOfNutmeg />} />
-            <Route path="/uses-of-nutmeg" element={<UsesOfNutmeg />} />
-            <Route path="/awards" element={<Awards />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Route>
+            {/* Redirect generic /login to /admin/login */}
+            <Route path="/login" element={<Navigate to="/admin/login" replace />} />
 
-          {/* Nursery Admin Protected Dashboard Routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="awards" element={<AdminAwards />} />
-            <Route path="testimonials" element={<AdminTestimonials />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="products/new" element={<AdminProductForm />} />
-            <Route path="products/:id/edit" element={<AdminProductForm />} />
-            <Route path="enquiries" element={<AdminEnquiries />} />
-            <Route path="settings" element={<AdminSettings />} />
-          </Route>
+            {/* 3. Protected Nursery Admin Dashboard Routes (Requires Authenticated + Verified Admin) */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']}>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="products/new" element={<AdminProductForm />} />
+              <Route path="products/:id/edit" element={<AdminProductForm />} />
+              <Route path="categories" element={<SuperAdminCategories />} />
+              <Route path="enquiries" element={<AdminEnquiries />} />
+              <Route path="testimonials" element={<AdminTestimonials />} />
+              <Route path="awards" element={<AdminAwards />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
 
-          {/* Super Admin Protected Dashboard Routes */}
-          <Route
-            path="/super-admin"
-            element={
-              <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<SuperAdminDashboard />} />
-            <Route path="nurseries" element={<SuperAdminNurseries />} />
-            <Route path="admins" element={<SuperAdminUsers />} />
-            <Route path="customers" element={<SuperAdminUsers />} />
-            <Route path="categories" element={<SuperAdminCategories />} />
-            <Route path="enquiries" element={<SuperAdminEnquiries />} />
-          </Route>
+            {/* 4. Super Admin routes redirecting seamlessly to unified /admin */}
+            <Route path="/super-admin/*" element={<Navigate to="/admin" replace />} />
 
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+            {/* 5. Fallback Route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
       </NurseryProvider>
     </AuthProvider>
   );

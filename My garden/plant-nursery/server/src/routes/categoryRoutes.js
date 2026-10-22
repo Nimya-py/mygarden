@@ -6,15 +6,15 @@ import {
   updateCategory,
   deleteCategory,
 } from '../controllers/categoryController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
 router.get('/', getCategories);
 router.get('/:slug', getCategoryBySlug);
 
-router.post('/', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), createCategory);
-router.put('/:id', authenticate, authorize('SUPER_ADMIN'), updateCategory);
-router.delete('/:id', authenticate, authorize('SUPER_ADMIN'), deleteCategory);
+router.post('/', requireAdmin, createCategory);
+router.put('/:id', requireAdmin, updateCategory);
+router.delete('/:id', requireAdmin, deleteCategory);
 
 export default router;

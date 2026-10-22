@@ -4,17 +4,21 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { MessageCircle } from 'lucide-react';
 
+import { useNursery } from '../context/NurseryContext';
+import { getWhatsAppUrl } from '../utils/whatsapp';
+
 export const PublicLayout = () => {
   const location = useLocation();
+  const { nursery } = useNursery();
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [location.pathname]);
 
-  const whatsappNumber = "919447312890";
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    "Hello Kinattukara Nutmeg Nursery, I would like to enquire about your plant collection."
-  )}`;
+  const rawPhone = nursery?.whatsapp || nursery?.phone || '919447312890';
+  const nurseryName = nursery?.name || 'Kinattukara Nutmeg Plantation & Nursery';
+  const presetMessage = `Hello ${nurseryName}, I would like to enquire about your nutmeg plants, sapling availability, and nursery visits.`;
+  const whatsappUrl = getWhatsAppUrl(rawPhone, presetMessage);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F7F5EE] text-[#172018]">

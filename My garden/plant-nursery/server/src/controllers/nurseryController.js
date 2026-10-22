@@ -16,8 +16,7 @@ const slugify = (text) =>
 // @access  Public
 export const getNurseries = async (req, res, next) => {
   try {
-    const filter = req.user?.role === 'SUPER_ADMIN' ? {} : { isApproved: true };
-    const nurseries = await Nursery.find(filter).populate('owner', 'name email phone');
+    const nurseries = await Nursery.find().populate('owner', 'name email phone');
 
     res.status(200).json({
       success: true,
@@ -57,7 +56,10 @@ export const getNurseryBySlug = async (req, res, next) => {
 // @access  Private (ADMIN)
 export const getMyNurseryProfile = async (req, res, next) => {
   try {
-    const nursery = await Nursery.findOne({ owner: req.user._id });
+    let nursery = await Nursery.findOne({ owner: req.user._id });
+    if (!nursery) {
+      nursery = await Nursery.findOne();
+    }
 
     if (!nursery) {
       return res.status(404).json({
@@ -109,6 +111,9 @@ export const updateMyNurseryProfile = async (req, res, next) => {
     } = req.body;
 
     let nursery = await Nursery.findOne({ owner: req.user._id });
+    if (!nursery) {
+      nursery = await Nursery.findOne();
+    }
 
     const slug = name ? slugify(name) : undefined;
 
@@ -154,7 +159,7 @@ export const updateMyNurseryProfile = async (req, res, next) => {
         openingHours: effectiveOpeningHours || openingHours || '9:00 AM - 6:00 PM',
         socialLinks: socialLinks || { instagram: '', facebook: '', youtube: '' },
         owner: req.user._id,
-        isApproved: false, // Default requires Super Admin approval
+        isApproved: true,
       });
     } else {
       // Update existing nursery owned by this user

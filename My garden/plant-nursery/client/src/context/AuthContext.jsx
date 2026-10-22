@@ -32,40 +32,141 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
-    const res = await API.post('/auth/login', { email, password });
-    if (res.data.success) {
-      const { token: authToken, user: userData } = res.data.data;
-      setToken(authToken);
-      setUser(userData);
-      localStorage.setItem('plant_nursery_token', authToken);
-      localStorage.setItem('plant_nursery_user', JSON.stringify(userData));
-      return userData;
+    try {
+      const res = await API.post('/auth/login', { email, password });
+      if (res.data.success) {
+        if (res.data.requiresOtp) {
+          return res.data;
+        }
+        const { token: authToken, user: userData } = res.data.data;
+        setToken(authToken);
+        setUser(userData);
+        localStorage.setItem('plant_nursery_token', authToken);
+        localStorage.setItem('plant_nursery_user', JSON.stringify(userData));
+        return userData;
+      }
+      throw new Error(res.data.message || 'Login failed');
+    } catch (err) {
+      const errorData = err.response?.data;
+      const error = new Error(errorData?.message || err.message || 'Login failed');
+      error.code = errorData?.code;
+      error.email = errorData?.email || email;
+      throw error;
     }
-    throw new Error(res.data.message || 'Login failed');
   };
 
-  const register = async (userData) => {
-    const res = await API.post('/auth/register', userData);
-    if (res.data.success) {
-      const { token: authToken, user: registeredUser } = res.data.data;
-      setToken(authToken);
-      setUser(registeredUser);
-      localStorage.setItem('plant_nursery_token', authToken);
-      localStorage.setItem('plant_nursery_user', JSON.stringify(registeredUser));
-      return registeredUser;
+  const verifyOtp = async (email, otp) => {
+    try {
+      const res = await API.post('/auth/verify-otp', { email, otp });
+      if (res.data.success) {
+        const { token: authToken, user: userData } = res.data.data;
+        setToken(authToken);
+        setUser(userData);
+        localStorage.setItem('plant_nursery_token', authToken);
+        localStorage.setItem('plant_nursery_user', JSON.stringify(userData));
+        return userData;
+      }
+      throw new Error(res.data.message || 'OTP verification failed');
+    } catch (err) {
+      const errorData = err.response?.data;
+      throw new Error(errorData?.message || err.message || 'OTP verification failed');
     }
-    throw new Error(res.data.message || 'Registration failed');
   };
 
-  const logout = () => {
+  const resendOtp = async (email) => {
+    try {
+      const res = await API.post('/auth/resend-otp', { email });
+      return res.data;
+    } catch (err) {
+      const errorData = err.response?.data;
+      throw new Error(errorData?.message || err.message || 'Failed to resend OTP');
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await API.post('/auth/logout');
+    } catch (e) {
+      // Ignore network errors on logout
+    }
     setToken('');
     setUser(null);
     localStorage.removeItem('plant_nursery_token');
     localStorage.removeItem('plant_nursery_user');
   };
 
+  const register = async (formData) => {
+    try {
+      const res = await API.post('/auth/register-admin', formData);
+      if (res.data.success) {
+        const { token: authToken, user: userData } = res.data.data;
+        setToken(authToken);
+        setUser(userData);
+        localStorage.setItem('plant_nursery_token', authToken);
+        localStorage.setItem('plant_nursery_user', JSON.stringify(userData));
+        return userData;
+      }
+      throw new Error(res.data.message || 'Registration failed');
+    } catch (err) {
+      const errorData = err.response?.data;
+      throw new Error(errorData?.message || err.message || 'Registration failed');
+    }
+  };
+
+  const requestRegisterOtp = async (formData) => {
+    try {
+      const res = await API.post('/auth/register-otp-request', formData);
+      return res.data;
+    } catch (err) {
+      const errorData = err.response?.data;
+      throw new Error(errorData?.message || err.message || 'Registration request failed');
+    }
+  };
+
+  const verifyRegisterOtp = async (email, otp) => {
+    try {
+      const res = await API.post('/auth/register-otp-verify', { email, otp });
+      if (res.data.success) {
+        const { token: authToken, user: userData } = res.data.data;
+        setToken(authToken);
+        setUser(userData);
+        localStorage.setItem('plant_nursery_token', authToken);
+        localStorage.setItem('plant_nursery_user', JSON.stringify(userData));
+        return userData;
+      }
+      throw new Error(res.data.message || 'Registration verification failed');
+    } catch (err) {
+      const errorData = err.response?.data;
+      throw new Error(errorData?.message || err.message || 'Registration verification failed');
+    }
+  };
+
+  const resendRegisterOtp = async (email) => {
+    try {
+      const res = await API.post('/auth/register-otp-resend', { email });
+      return res.data;
+    } catch (err) {
+      const errorData = err.response?.data;
+      throw new Error(errorData?.message || err.message || 'Failed to resend registration code');
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        verifyOtp,
+        resendOtp,
+        requestRegisterOtp,
+        verifyRegisterOtp,
+        resendRegisterOtp,
+        logout,
+        register,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

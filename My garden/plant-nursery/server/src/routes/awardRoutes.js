@@ -1,8 +1,9 @@
 import express from 'express';
 import { Award } from '../models/Award.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
+
 
 // @desc    Get ISO 9001:2000 Award & Certificate Information
 // @route   GET /api/awards
@@ -33,7 +34,7 @@ router.get('/', async (req, res, next) => {
 // @desc    Update Award & Certificate Image
 // @route   PUT /api/awards
 // @access  Private (Admin / Super Admin)
-router.put('/', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), async (req, res, next) => {
+router.put('/', requireAdmin, async (req, res, next) => {
   try {
     const {
       title,

@@ -19,25 +19,21 @@ export const seedDatabase = async () => {
 
     console.log('Cleared old database records.');
 
-    // 1. Create Super Admin
-    const superAdmin = await User.create({
-      name: 'Super Admin',
-      email: 'superadmin@kinattukara.com',
-      password: 'SuperAdmin123!',
-      phone: '+91 9447312890',
-      role: 'SUPER_ADMIN',
+    // 1. Create Initial Nursery Administrator from Secure Environment Variables
+    const adminEmail = (process.env.ADMIN_EMAIL || 'admin@kinattukara.com').toLowerCase().trim();
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Kinattukara2026!#';
+
+    const nurseryAdmin = await User.create({
+      name: 'Kinattukara Nursery Administrator',
+      email: adminEmail,
+      password: adminPassword,
+      phone: '+91 94473 12890',
+      role: 'ADMIN',
+      emailVerified: true, // Verified by seed configuration
       isActive: true,
     });
 
-    // 2. Create Nursery Admin (Kinattukara Owner)
-    const nurseryAdmin = await User.create({
-      name: 'Kinattukara Nursery Owner',
-      email: 'admin@kinattukara.com',
-      password: 'Kinattukara123!',
-      phone: '+91 9447312890',
-      role: 'ADMIN',
-      isActive: true,
-    });
+    console.log(`Initialized secure administrator account: ${adminEmail}`);
 
     // 3. Create Sample Customer
     const customer = await User.create({

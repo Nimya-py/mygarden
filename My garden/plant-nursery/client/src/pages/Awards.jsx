@@ -369,108 +369,41 @@ export const Awards = () => {
       </section>
 
       {/* ==================================================
-          3. VERIFIED PLANTER TESTIMONIALS (DARK GREEN)
+          3. VERIFIED PLANTER EXPERIENCES BRIDGE
           - Background: #0B2419
-          - Authentic grower testimonials with plantation details
+          - Sleek link to dedicated Testimonials page
          ================================================== */}
-      <section id="testimonials" className="py-16 sm:py-20 lg:py-24 bg-[#0B2419] border-t border-[#123D27]/40 scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 xl:px-14 space-y-12">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <section className="py-16 sm:py-20 bg-[#0B2419] border-t border-[#123D27]/40">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 xl:px-14">
+          <div className="rounded-[20px] bg-[#071C14] border border-[#123D27] p-8 sm:p-12 lg:p-14 flex flex-col lg:flex-row lg:items-center justify-between gap-8 shadow-2xl">
             <div className="space-y-3 max-w-2xl">
               <div className="inline-flex items-center space-x-2">
                 <Star className="w-4 h-4 text-[#C4E85A] fill-[#C4E85A]" />
                 <span className="font-display text-xs sm:text-[13px] font-bold tracking-[0.25em] text-[#C4E85A] uppercase">
-                  FIELD VERIFICATION
+                  GROWER COMMUNITY & YIELD REPORTS
                 </span>
               </div>
 
-              <h2 className="font-display text-[34px] sm:text-[46px] lg:text-[56px] font-extrabold text-[#F2F0E5] leading-[0.98] tracking-[-0.03em] uppercase">
+              <h2 className="font-display text-[32px] sm:text-[42px] lg:text-[48px] font-extrabold text-[#F2F0E5] leading-[0.98] tracking-[-0.03em] uppercase">
                 COMMERCIAL PLANTER <br />
-                <span className="text-[#C4E85A]">EXPERIENCES.</span>
+                <span className="text-[#C4E85A]">TESTIMONIALS.</span>
               </h2>
 
               <p className="text-sm sm:text-base text-[#D8D9C9]/80 font-normal leading-relaxed">
-                Direct feedback from commercial estate owners, multi-acre farmers, and dedicated growers across South India cultivating Kinattukara grafted nutmeg.
+                Discover firsthand cultivation feedback, orchard ages, mace yields, and crop experiences from multi-acre planters and estate owners across Kerala and South India.
               </p>
             </div>
 
-            <div>
-              <button
-                type="button"
-                onClick={() => {
-                  setReviewSuccess(false);
-                  setReviewModalOpen(true);
-                }}
-                className="inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-[#123D27] hover:bg-[#C4E85A] text-[#F2F0E5] hover:text-[#071C14] text-xs font-bold tracking-wider uppercase border border-[#123D27] hover:border-[#C4E85A] transition-all"
+            <div className="shrink-0 flex flex-col sm:flex-row lg:flex-col gap-3">
+              <Link
+                to="/testimonials"
+                className="inline-flex items-center justify-center space-x-2.5 px-8 py-4 rounded-full bg-[#C4E85A] hover:bg-[#d4f570] text-[#071C14] text-xs sm:text-sm font-display font-extrabold tracking-wider uppercase transition-all shadow-xl"
               >
-                <Plus className="w-4 h-4" />
-                <span>SHARE YOUR HARVEST STORY</span>
-              </button>
+                <span>EXPLORE TESTIMONIALS</span>
+                <ArrowRight className="w-4 h-4 text-[#071C14]" />
+              </Link>
             </div>
           </div>
-
-          {/* Testimonials Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-            {testimonials.map((t, idx) => (
-              <div
-                key={t._id || idx}
-                className="rounded-[16px] bg-[#071C14] border border-[#123D27] p-7 sm:p-8 space-y-5 shadow-xl flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  {/* Star Rating Strip */}
-                  <div className="flex items-center space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < (t.rating || 5)
-                            ? 'text-[#C4E85A] fill-[#C4E85A]'
-                            : 'text-[#123D27] fill-[#123D27]'
-                        }`}
-                      />
-                    ))}
-                    <span className="ml-2 font-mono text-xs text-[#D8D9C9]/60">
-                      5.0 RATING
-                    </span>
-                  </div>
-
-                  {/* Comment */}
-                  <p className="text-sm sm:text-base text-[#F2F0E5] font-normal leading-relaxed italic">
-                    "{t.comment}"
-                  </p>
-                </div>
-
-                {/* Planter & Orchard Metadata */}
-                <div className="pt-4 border-t border-[#123D27]/60 flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <div>
-                    <span className="font-display font-bold text-[#F2F0E5] uppercase tracking-wide block">
-                      {t.name}
-                    </span>
-                    <span className="text-[#D8D9C9]/70">
-                      {t.place ? `${t.place}, ` : ''}{t.district || 'Kerala'}
-                    </span>
-                  </div>
-
-                  {(t.cultivation || t.plantationAge) && (
-                    <div className="text-right">
-                      {t.cultivation && (
-                        <span className="font-mono text-[#C4E85A] font-semibold block uppercase">
-                          {t.cultivation} GROVE
-                        </span>
-                      )}
-                      {t.plantationAge && (
-                        <span className="text-[11px] text-[#D8D9C9]/60">
-                          {t.plantationAge}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
         </div>
       </section>
 
@@ -591,143 +524,6 @@ export const Awards = () => {
                 />
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ==================================================
-          6. CUSTOMER REVIEW SUBMISSION MODAL
-         ================================================== */}
-      {reviewModalOpen && (
-        <div className="fixed inset-0 z-50 bg-[#04110C]/90 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#071C14] border border-[#123D27] rounded-[16px] max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#123D27]">
-              <div>
-                <span className="font-display text-xs font-bold text-[#C4E85A] uppercase tracking-wider block">
-                  COMMERCIAL PLANTER FEEDBACK
-                </span>
-                <h3 className="font-display text-xl sm:text-2xl font-bold text-[#F2F0E5] uppercase">
-                  Share Your Cultivation Story
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setReviewModalOpen(false)}
-                className="text-[#D8D9C9]/70 hover:text-[#C4E85A] p-1 rounded-full hover:bg-[#123D27]"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {reviewSuccess ? (
-              <div className="py-8 text-center space-y-4">
-                <CheckCircle2 className="w-12 h-12 text-[#C4E85A] mx-auto" />
-                <h4 className="font-display text-xl font-bold text-[#F2F0E5] uppercase">
-                  Thank You for Your Feedback!
-                </h4>
-                <p className="text-xs sm:text-sm text-[#D8D9C9] max-w-sm mx-auto leading-relaxed">
-                  Your harvest review has been submitted successfully. Once verified by the nursery team, it will be published to our community archive.
-                </p>
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setReviewModalOpen(false)}
-                    className="px-6 py-2.5 bg-[#C4E85A] text-[#071C14] rounded-full text-xs font-bold tracking-wider uppercase hover:bg-white transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleReviewSubmit} className="space-y-4 text-xs">
-                <div className="space-y-1">
-                  <label className="font-semibold text-[#D8D9C9] uppercase tracking-wider">Your Full Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={newReview.name}
-                    onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                    placeholder="e.g. Mr. K. R. George"
-                    className="w-full bg-[#0B2419] border border-[#123D27] rounded-lg px-3.5 py-2.5 text-[#F2F0E5] placeholder-[#D8D9C9]/40 focus:border-[#C4E85A] outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="font-semibold text-[#D8D9C9] uppercase tracking-wider">Place / Town</label>
-                    <input
-                      type="text"
-                      value={newReview.place}
-                      onChange={(e) => setNewReview({ ...newReview, place: e.target.value })}
-                      placeholder="e.g. Pala"
-                      className="w-full bg-[#0B2419] border border-[#123D27] rounded-lg px-3.5 py-2.5 text-[#F2F0E5] placeholder-[#D8D9C9]/40 focus:border-[#C4E85A] outline-none"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-[#D8D9C9] uppercase tracking-wider">District</label>
-                    <input
-                      type="text"
-                      value={newReview.district}
-                      onChange={(e) => setNewReview({ ...newReview, district: e.target.value })}
-                      placeholder="e.g. Kottayam"
-                      className="w-full bg-[#0B2419] border border-[#123D27] rounded-lg px-3.5 py-2.5 text-[#F2F0E5] placeholder-[#D8D9C9]/40 focus:border-[#C4E85A] outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="font-semibold text-[#D8D9C9] uppercase tracking-wider">Grove Acreage</label>
-                    <input
-                      type="text"
-                      value={newReview.cultivation}
-                      onChange={(e) => setNewReview({ ...newReview, cultivation: e.target.value })}
-                      placeholder="e.g. 5 Acres"
-                      className="w-full bg-[#0B2419] border border-[#123D27] rounded-lg px-3.5 py-2.5 text-[#F2F0E5] placeholder-[#D8D9C9]/40 focus:border-[#C4E85A] outline-none"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-[#D8D9C9] uppercase tracking-wider">Orchard Age</label>
-                    <input
-                      type="text"
-                      value={newReview.plantationAge}
-                      onChange={(e) => setNewReview({ ...newReview, plantationAge: e.target.value })}
-                      placeholder="e.g. 6 Year Orchard"
-                      className="w-full bg-[#0B2419] border border-[#123D27] rounded-lg px-3.5 py-2.5 text-[#F2F0E5] placeholder-[#D8D9C9]/40 focus:border-[#C4E85A] outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-[#D8D9C9] uppercase tracking-wider">Cultivation Experience & Results *</label>
-                  <textarea
-                    rows={4}
-                    required
-                    value={newReview.comment}
-                    onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                    placeholder="Share how your grafted nutmeg saplings performed, canopy growth, fruit setting, or nursery guidance..."
-                    className="w-full bg-[#0B2419] border border-[#123D27] rounded-lg p-3 text-[#F2F0E5] placeholder-[#D8D9C9]/40 focus:border-[#C4E85A] outline-none resize-none"
-                  />
-                </div>
-
-                <div className="pt-2 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setReviewModalOpen(false)}
-                    className="px-5 py-2.5 rounded-full border border-[#123D27] text-[#D8D9C9] hover:text-[#F2F0E5]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={reviewSubmitting}
-                    className="px-6 py-2.5 bg-[#C4E85A] text-[#071C14] rounded-full font-bold uppercase tracking-wider hover:bg-white transition-colors"
-                  >
-                    {reviewSubmitting ? 'Submitting...' : 'Submit Story'}
-                  </button>
-                </div>
-              </form>
-            )}
           </div>
         </div>
       )}

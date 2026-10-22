@@ -11,10 +11,14 @@ import {
   ArrowRight,
   AlertCircle,
   Calendar,
+  Grid,
+  ShieldCheck,
 } from 'lucide-react';
 import API from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 export const AdminDashboard = () => {
+  const { user } = useAuth();
   const [nursery, setNursery] = useState(null);
   const [products, setProducts] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
@@ -78,11 +82,24 @@ export const AdminDashboard = () => {
       {/* 3. Page Header: Compact & Professional */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2E8DF] pb-5">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-[#0B2115] tracking-tight">
-            Nursery Dashboard
-          </h1>
-          <p className="text-sm text-[#526651] mt-1 font-medium">
-            {nursery?.name || 'Kinattukara Nutmeg Plantation & Nursery'}
+          <div className="flex items-center space-x-3">
+            <h1 className="font-serif text-3xl font-bold text-[#0B2115] tracking-tight">
+              Nursery Dashboard
+            </h1>
+            {user && (
+              <span className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Verified Admin</span>
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-[#526651] mt-1 font-medium flex items-center flex-wrap gap-x-2">
+            <span>{nursery?.name || 'Kinattukara Nutmeg Plantation & Nursery'}</span>
+            {user?.email && (
+              <span className="text-xs text-[#8E9B8D] font-normal">
+                • Signed in as {user.email}
+              </span>
+            )}
           </p>
         </div>
 
@@ -105,24 +122,6 @@ export const AdminDashboard = () => {
           </Link>
         </div>
       </div>
-
-      {/* Approval Status Alert Banner (if pending) */}
-      {nursery && !nursery.isApproved && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900 shadow-xs">
-          <div className="flex items-center space-x-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-            <div>
-              <p className="font-semibold text-amber-900">Approval Pending from Super Admin</p>
-              <p className="text-[11px] text-amber-800/80">
-                Your nursery registration is under review. Once approved, your products will be visible on the public platform.
-              </p>
-            </div>
-          </div>
-          <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold uppercase text-[10px] border border-amber-300">
-            Pending Approval
-          </span>
-        </div>
-      )}
 
       {/* 4 & 5. Summary Statistics: Clean Light Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -236,6 +235,21 @@ export const AdminDashboard = () => {
             </Link>
 
             <Link
+              to="/admin/categories"
+              className="bg-white hover:bg-[#F2F4EF] border border-[#E2E8DF] hover:border-[#163A24]/40 rounded-xl p-3.5 flex flex-col justify-between space-y-2 transition-all shadow-xs group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-[#EAF0E8] text-[#163A24] flex items-center justify-center group-hover:bg-[#163A24] group-hover:text-[#F7F5EE] transition-colors">
+                <Grid className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="block text-xs font-semibold text-[#0B2115]">
+                  Categories
+                </span>
+                <span className="block text-[11px] text-[#637863]">Plant groups</span>
+              </div>
+            </Link>
+
+            <Link
               to="/admin/enquiries"
               className="bg-white hover:bg-[#F2F4EF] border border-[#E2E8DF] hover:border-[#163A24]/40 rounded-xl p-3.5 flex flex-col justify-between space-y-2 transition-all shadow-xs group"
             >
@@ -251,23 +265,6 @@ export const AdminDashboard = () => {
             </Link>
 
             <Link
-              to="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white hover:bg-[#F2F4EF] border border-[#E2E8DF] hover:border-[#163A24]/40 rounded-xl p-3.5 flex flex-col justify-between space-y-2 transition-all shadow-xs group"
-            >
-              <div className="w-8 h-8 rounded-lg bg-[#EBF3FF] text-[#1D4ED8] flex items-center justify-center group-hover:bg-[#1D4ED8] group-hover:text-white transition-colors">
-                <Globe className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-xs font-semibold text-[#0B2115]">
-                  Manage Website
-                </span>
-                <span className="block text-[11px] text-[#637863]">Storefront</span>
-              </div>
-            </Link>
-
-            <Link
               to="/admin/settings"
               className="bg-white hover:bg-[#F2F4EF] border border-[#E2E8DF] hover:border-[#163A24]/40 rounded-xl p-3.5 flex flex-col justify-between space-y-2 transition-all shadow-xs group"
             >
@@ -276,9 +273,9 @@ export const AdminDashboard = () => {
               </div>
               <div>
                 <span className="block text-xs font-semibold text-[#0B2115]">
-                  Edit Nursery Profile
+                  Edit Profile & Settings
                 </span>
-                <span className="block text-[11px] text-[#637863]">Settings</span>
+                <span className="block text-[11px] text-[#637863]">WhatsApp & Info</span>
               </div>
             </Link>
 
